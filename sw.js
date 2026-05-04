@@ -1,50 +1,50 @@
 // This service worker caches static assets for offline functionality.
 
-const CACHE_NAME = 'my-site-cache-v1';
+const CACHE_NAME = "trailstrength-v1";
+
+// IMPORTANT: GitHub Pages base path
+const BASE_PATH = "/TrailStrength/";
+
 const urlsToCache = [
-  '/index.html',
-  '/styles/main.css',
-  '/script/main.js',
-  // Add any other assets you want to cache
+  BASE_PATH,
+  BASE_PATH + "index.html",
+  BASE_PATH + "manifest.json"
+  // Add your files below if they exist:
+  // BASE_PATH + "styles.css",
+  // BASE_PATH + "app.js",
+  // BASE_PATH + "icons/icon-192.png",
+  // BASE_PATH + "icons/icon-512.png"
 ];
 
-// Install the service worker
-self.addEventListener('install', event => {
+// INSTALL EVENT
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
   );
+  self.skipWaiting();
 });
 
-// Fetch assets from the cache
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
-
-// Update the cache version
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+// ACTIVATE EVENT
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       );
+    })
+  );
+  self.clients.claim();
+});
+
+// FETCH EVENT (offline support)
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
