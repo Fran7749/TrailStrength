@@ -1,4 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <title>Dumbbell Icon</title>
-  <path fill="#000" d="M6 32c-1.104 0-2 .896-2 2s.896 2 2 2c1.104 0 2-.896 2-2s-.896-2-2-2zm56 0c-1.104 0-2 .896-2 2s.896 2 2 2c1.104 0 2-.896 2-2s-.896-2-2-2zM18 38c7.732 0 14 6.268 14 14a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2c0-7.732 6.268-14 14-14zm28-4c-7.732 0-14-6.268-14-14a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2c0 7.732-6.268 14-14 14zm12-22a2 2 0 0 1 2-2c1.104 0 2 .896 2 2s-.896 2-2 2c-1.104 0-2-.896-2-2zm-56 0a2 2 0 0 1-2-2c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#FAFAF7" rx="40"/>
+  
+  <!-- Upper arm (bicep) -->
+  <ellipse cx="100" cy="70" rx="28" ry="35" fill="#F4A460"/>
+  
+  <!-- Bicep muscle definition -->
+  <ellipse cx="85" cy="55" rx="18" ry="20" fill="#FFB87F" opacity="0.7"/>
+  
+  <!-- Forearm -->
+  <rect x="75" y="95" width="50" height="65" rx="12" fill="#F4A460"/>
+  
+  <!-- Forearm muscle lines -->
+  <line x1="85" y1="100" x2="85" y2="150" stroke="#E89350" stroke-width="2.5" opacity="0.6"/>
+  <line x1="100" y1="100" x2="100" y2="155" stroke="#E89350" stroke-width="2.5" opacity="0.6"/>
+  <line x1="115" y1="100" x2="115" y2="150" stroke="#E89350" stroke-width="2.5" opacity="0.6"/>
+  
+  <!-- Fist -->
+  <rect x="70" y="150" width="60" height="50" rx="8" fill="#F4A460"/>
+  
+  <!-- Fist definition -->
+  <line x1="85" y1="150" x2="85" y2="195" stroke="#E89350" stroke-width="2" opacity="0.5"/>
+  <line x1="100" y1="150" x2="100" y2="195" stroke="#E89350" stroke-width="2" opacity="0.5"/>
+  <line x1="115" y1="150" x2="115" y2="195" stroke="#E89350" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Thumb -->
+  <ellipse cx="60" cy="160" rx="12" ry="18" fill="#F4A460" transform="rotate(-35 60 160)"/>
+  
+  <!-- Highlight/shine on bicep -->
+  <ellipse cx="95" cy="50" rx="12" ry="15" fill="#FFD9A8" opacity="0.5"/>
+  
+  <!-- Highlight on forearm -->
+  <ellipse cx="88" cy="115" rx="8" ry="20" fill="#FFD9A8" opacity="0.4"/>
 </svg>
