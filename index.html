@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#534AB7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Strength Plan">
+<title>Marathon Strength Plan</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #FAFAF7;
+  color: #1F1E1C;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 14px 32px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+}
+h1 { margin: 0 0 2px; font-size: 22px; font-weight: 500; color: #1F1E1C; }
+.sub { font-size: 12px; color: #6B6A66; }
+.progress-card {
+  background: #F1EFE8;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 14px 0;
+}
+.progress-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.progress-label { font-size: 12px; color: #6B6A66; }
+.progress-stat { font-size: 13px; font-weight: 500; }
+.progress-bar-track {
+  background: #FFFFFF;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  background: #185FA5;
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s;
+}
+.streak {
+  font-size: 12px;
+  color: #6B6A66;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.phase-card {
+  border-radius: 8px;
+  padding: 10px;
+}
+.phase-card .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.phase-card .name { font-size: 13px; font-weight: 500; }
+.phase-card .pct { font-size: 11px; }
+.phase-card .range { font-size: 11px; margin-top: 2px; }
+.phase-1 { background: #EEEDFE; }
+.phase-1 .name { color: #3C3489; }
+.phase-1 .pct, .phase-1 .range { color: #534AB7; }
+.phase-2 { background: #E1F5EE; }
+.phase-2 .name { color: #085041; }
+.phase-2 .pct, .phase-2 .range { color: #0F6E56; }
+.phase-3 { background: #FBEAF0; }
+.phase-3 .name { color: #72243E; }
+.phase-3 .pct, .phase-3 .range { color: #993556; }
+.phase-4 { background: #FAEEDA; }
+.phase-4 .name { color: #633806; }
+.phase-4 .pct, .phase-4 .range { color: #854F0B; }
+.button-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.btn {
+  flex: 1;
+  font-size: 12px;
+  padding: 11px 8px;
+  background: transparent;
+  border: 0.5px solid #C8C6BD;
+  border-radius: 8px;
+  color: #1F1E1C;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.btn:active { background: #F1EFE8; transform: scale(0.98); }
+.library {
+  display: none;
+  background: #FFFFFF;
+  border: 0.5px solid #E5E3DB;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.library.open { display: block; }
+.library-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.library-sub { font-size: 12px; color: #6B6A66; margin-bottom: 12px; line-height: 1.5; }
+.library-group { margin-bottom: 14px; }
+.library-group-title {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #6B6A66;
+}
+.library-item {
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 2px solid #E5E3DB;
+}
+.library-item-name { font-size: 13px; font-weight: 500; }
+.library-item-cues {
+  font-size: 12px;
+  color: #6B6A66;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.library-item-why {
+  font-size: 11px;
+  color: #185FA5;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.week {
+  margin-bottom: 8px;
+  background: #FFFFFF;
+  border: 0.5px solid #E5E3DB;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.week-header {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  min-height: 48px;
+}
+.week-header:active { background: #F1EFE8; }
+.phase-stripe {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.week-info { flex: 1; min-width: 0; }
+.week-title-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.week-num { font-size: 14px; font-weight: 500; }
+.week-date { font-size: 11px; color: #6B6A66; }
+.week-focus {
+  font-size: 11px;
+  color: #6B6A66;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.session-counter {
+  font-size: 11px;
+  color: #6B6A66;
+  flex-shrink: 0;
+  padding: 4px 8px;
+  background: #F1EFE8;
+  border-radius: 999px;
+}
+.chevron { flex-shrink: 0; color: #6B6A66; }
+.chevron svg { display: block; transition: transform 0.2s; }
+.chevron.open svg { transform: rotate(90deg); }
+.sessions {
+  border-top: 0.5px solid #E5E3DB;
+  padding: 4px 12px 8px;
+}
+.session {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid #E5E3DB;
+}
+.session:last-child { border-bottom: none; }
+.checkbox {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid #C8C6BD;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.checkbox.done { border-color: transparent; }
+.session-body { flex: 1; min-width: 0; }
+.session-body.done { opacity: 0.55; }
+.session-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.session-day { font-size: 13px; font-weight: 500; }
+.session-type {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.session-list { font-size: 13px; line-height: 1.6; }
+.exercise-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+}
+.exercise-name {
+  color: #185FA5;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: #E5E3DB;
+  text-underline-offset: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.exercise-reps {
+  color: #6B6A66;
+  font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: 0;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: #FFFFFF;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px 18px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+.modal h2 { margin: 0 0 4px; font-size: 18px; font-weight: 500; }
+.modal-sub { font-size: 12px; color: #6B6A66; margin-bottom: 14px; }
+.modal h3 { margin: 14px 0 6px; font-size: 14px; font-weight: 500; }
+.modal p { margin: 6px 0; font-size: 14px; line-height: 1.6; }
+.modal .why-box {
+  background: #F1EFE8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 14px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.modal-close {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  background: #1F1E1C;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.install-banner {
+  display: none;
+  background: #185FA5;
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.install-banner.show { display: flex; }
+.install-banner button {
+  background: #FFFFFF;
+  color: #185FA5;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.install-banner .dismiss {
+  background: transparent;
+  color: #FFFFFF;
+  padding: 4px 8px;
+  font-size: 18px;
+  line-height: 1;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Marathon strength plan</h1>
+  <div class="sub">25 May to 11 Oct - 20 weeks - Mon to Thu</div>
+
+  <div id="install-banner" class="install-banner">
+    <span>Install as app for offline use</span>
+    <div style="display: flex; gap: 4px; align-items: center;">
+      <button id="install-btn">Install</button>
+      <button class="dismiss" id="install-dismiss" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-row">
+      <span class="progress-label">Overall progress</span>
+      <span class="progress-stat" id="overall-stat">0 / 80</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="overall-bar"></div>
+    </div>
+    <div class="streak" id="streak-line">Let's get started</div>
+  </div>
+
+  <div class="phase-grid">
+    <div class="phase-card phase-1">
+      <div class="top"><span class="name">Foundation</span><span class="pct" id="phase-1-pct">0%</span></div>
+      <div class="range">Wk 1-4</div>
+    </div>
+    <div class="phase-card phase-2">
+      <div class="top"><span class="name">Build</span><span class="pct" id="phase-2-pct">0%</span></div>
+      <div class="range">Wk 5-10</div>
+    </div>
+    <div class="phase-card phase-3">
+      <div class="top"><span class="name">Strength</span><span class="pct" id="phase-3-pct">0%</span></div>
+      <div class="range">Wk 11-16</div>
+    </div>
+    <div class="phase-card phase-4">
+      <div class="top"><span class="name">Sharpen</span><span class="pct" id="phase-4-pct">0%</span></div>
+      <div class="range">Wk 17-20</div>
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button class="btn" id="exercises-btn">Exercise library</button>
+    <button class="btn" id="reset-btn">Reset</button>
+  </div>
+
+  <div class="library" id="exercise-library">
+    <div class="library-title">Exercise library</div>
+    <div class="library-sub">Tap any exercise inside a session for a detailed form check.</div>
+    <div id="library-content"></div>
+  </div>
+
+  <div id="weeks-container"></div>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const exercises = {
+  'bodyweight-squat': { name: 'Bodyweight squat', cat: 'legs', cues: 'Feet shoulder-width, toes slightly out. Sit back and down, chest up, knees over toes. Drive through whole foot.', why: 'Foundational lower-body movement.', detail: 'Keep your weight balanced through the middle of the foot, not the toes. Aim for thighs parallel to floor or as close as your mobility allows. Common mistake: knees collapsing inward - push them out toward your little toes as you stand.' },
+  'goblet-squat': { name: 'Goblet squat', cat: 'legs', cues: 'Hold one dumbbell vertically against chest, both hands cupping top end. Squat with chest up, elbows tracking inside knees.', why: 'Front-load teaches upright posture.', detail: 'The held weight forces your torso upright - if you hunch forward you will drop the weight. Elbows should brush the inside of your knees at the bottom. This is the kindest squat variation for most runners learning loaded patterns.' },
+  'back-squat': { name: 'Back squat', cat: 'legs', cues: 'Bar across upper traps. Feet shoulder-width. Brace, sit back and down. Drive up through whole foot.', why: 'Heaviest leg builder. Force production for hills.', detail: 'Bar sits on the meaty part of upper back, never the neck. Take a big breath before each rep and brace as if expecting a punch. Drive feet through floor. If knees cave or hips shoot up first, reduce weight.' },
+  'front-squat': { name: 'Front squat', cat: 'legs', cues: 'Bar across front of shoulders, elbows high (or two dumbbells at shoulders). Squat upright with elbows up.', why: 'Quad-focused with massive core demand.', detail: 'Elbows up is the cue that matters - if they drop, you will collapse forward. With dumbbells, rest them on shoulders with elbows pointing forward. Quad-dominant pattern that mimics hill running mechanics.' },
+  'tempo-squat': { name: 'Tempo squat', cat: 'legs', cues: 'Goblet or back squat - lower over 3 seconds, pause 1s at bottom, drive up at normal speed. Lighter weight.', why: 'Time under tension builds tendon resilience.', detail: 'Use 60-70% of your normal squat weight. The slow eccentric (lowering) and pause builds tendon strength without needing heavy load. Great for runners coming back from injury or wanting bulletproof knees.' },
+  'wall-sit': { name: 'Wall sit', cat: 'legs', cues: 'Back against wall, slide down until thighs parallel to floor. Knees over ankles. Hold.', why: 'Quad endurance for long downhills.', detail: 'Knees should be directly over ankles, not pushed forward. The burn is the point. If your form breaks early, come up sooner and add a set rather than holding through bad form.' },
+  'goblet-cyclist-squat': { name: 'Cyclist squat', cat: 'legs', cues: 'Heels elevated on small plate or book. Goblet squat with feet close together, going as deep as you can.', why: 'Bias toward quads with full range.', detail: 'Heels elevated about 1 inch on a sturdy book or plate. Feet narrow, almost together. Squat as deep as you comfortably can. This puts huge emphasis on the quads - feel the burn in the front of your thighs.' },
+  'glute-bridge': { name: 'Glute bridge', cat: 'legs', cues: 'On back, knees bent, feet flat. Squeeze glutes and lift hips into a straight line. Pause 1s. Ribs down.', why: 'Wakes up sleepy glutes - running engine.', detail: 'The squeeze at the top is what matters - imagine pinching a coin between your bum cheeks. Keep ribs pulled down toward hips, not flared up. If you feel it in your low back, you are over-extending.' },
+  'rdl': { name: 'Romanian deadlift', cat: 'legs', cues: 'Weights at thighs. Soft knees. Hinge at hips, push bum back, lower along legs to mid-shin. Drive hips forward.', why: 'Most important lift for runners.', detail: 'This is a hinge, not a squat - knees stay slightly bent throughout, hips travel back. Weights stay close to your legs the whole time, almost dragging down your shins. You should feel a strong stretch in your hamstrings at the bottom.' },
+  'deadlift': { name: 'Deadlift', cat: 'legs', cues: 'Bar over mid-foot, feet hip-width. Hinge to grip. Chest up, back flat. Drive floor away with legs.', why: 'Posterior chain power for late-race miles.', detail: 'Bar starts on the floor over the middle of your feet, almost touching shins. Hinge to grip without rounding your back. Drive feet through floor as if pushing the earth away. Lockout by squeezing glutes hard, not by leaning back.' },
+  'sumo-deadlift': { name: 'Sumo deadlift', cat: 'legs', cues: 'Wider stance, toes pointed out, hands inside knees. More upright torso. Drive knees out as you stand.', why: 'Hits glutes and adductors harder.', detail: 'Stance roughly 1.5x shoulder-width with toes turned out 30-45 degrees. Hands grip inside your knees. As you stand, focus on driving your knees outward over your toes. Often easier on the lower back than conventional deadlift.' },
+  'hip-thrust': { name: 'Hip thrust', cat: 'legs', cues: 'Upper back on couch. Weight on hips (cushion if needed). Drive hips up to flat tabletop, squeeze glutes.', why: 'Best loaded glute exercise that exists.', detail: 'Upper back rests on the edge of a sturdy couch or bench, not the middle. Knees bent at 90 degrees at the top. Use a folded towel or pad if the weight digs into your hip bones. Squeeze glutes HARD at the top for a 1-second pause.' },
+  'single-leg-glute-bridge': { name: 'Single-leg glute bridge', cat: 'legs', cues: 'Glute bridge with one leg lifted. Drive through planted foot. Keep hips level.', why: 'Finds left/right imbalances.', detail: 'Lift one foot off the floor, knee bent or leg extended straight. The key is keeping your hips perfectly level - if one side dips or rises, you have found your weaker side. Do extra reps on the weaker leg until they balance.' },
+  'good-morning': { name: 'Good morning', cat: 'legs', cues: 'Bar across upper back (or dumbbells at shoulders). Soft knees, hinge at hips, lower torso toward parallel.', why: 'Hamstring and lower back strength.', detail: 'Move slowly and use much lighter weight than you think. The movement is a hip hinge with the load on your back rather than in your hands. Push hips back, not down. Stop when your back wants to round - that is your range.' },
+  'kb-swing': { name: 'Kettlebell swing', cat: 'legs', cues: 'One weight in both hands. Hinge to swing back between legs, snap hips forward to swing weight to chest height.', why: 'Power-endurance for hills.', detail: 'This is a hip-driven movement, not an arm raise. The arms are just ropes - the hip snap propels the weight up. Weight only needs to reach chest height. Keep back flat throughout. Glutes should fire hard at the top.' },
+  'reverse-lunge': { name: 'Reverse lunge', cat: 'legs', cues: 'Step one foot back into a lunge, both knees ~90 deg. Front knee over ankle. Push through front heel.', why: 'Mimics running. Kinder on knees.', detail: 'Stepping back rather than forward keeps your front knee in a safer position. Lower until back knee is just above the floor - do not crash it down. Drive up through the front heel, keeping the back foot light.' },
+  'walking-lunge': { name: 'Walking lunge', cat: 'legs', cues: 'Weights at sides. Step forward into lunge, drive through front heel and step back foot through into next lunge.', why: 'Dynamic single-leg control.', detail: 'Take a big enough step that your front knee stays over your ankle, not pushed past your toes. Drive up through the front heel and walk through into the next lunge. Stay tall - do not lean forward.' },
+  'lateral-lunge': { name: 'Lateral lunge', cat: 'legs', cues: 'Step wide to one side, sit back into that hip while keeping the other leg straight. Push back to standing.', why: 'Side-to-side strength for trail stumbles.', detail: 'Step really wide - wider than feels natural. Sit back and DOWN into the lunging side, keeping the other leg perfectly straight with the foot flat. The trailing leg gets a great inner-thigh stretch. Push off forcefully to return.' },
+  'curtsy-lunge': { name: 'Curtsy lunge', cat: 'legs', cues: 'Step one foot diagonally behind the other (like a curtsy). Lower into lunge, drive up. Front knee over middle of foot.', why: 'Hits glute medius - stops knees caving.', detail: 'Step behind AND across, not just back. Front knee tracks over the middle of the foot - if it caves toward the big toe, lighten up or shorten the range. Push back through the front heel, glute squeezing as you stand.' },
+  'split-squat': { name: 'Split squat', cat: 'legs', cues: 'Stagger stance, ~2 feet apart. Lower straight down, back knee toward floor. Drive up through front heel.', why: 'Single-leg strength fix for runners.', detail: 'Set your stance and stay there for all reps - this is not a lunge. Lower straight down (not forward), back knee tracking toward the floor without crashing. Most of your weight should be on the front leg.' },
+  'bulgarian-split-squat': { name: 'Bulgarian split squat', cat: 'legs', cues: 'Back foot on couch (laces down). Front foot far enough forward that knee stays over ankle. Lower until back knee nearly touches floor.', why: 'Brutal but brilliant single-leg builder.', detail: 'Back foot laces-down on the couch. Front foot needs to be far enough forward that when you lower, the front knee stays over the ankle - if it pushes past your toes, hop your front foot further forward. Brutal but the best.' },
+  'step-up': { name: 'Step-up', cat: 'legs', cues: 'Foot fully on knee-height step. Drive through that heel to stand on the step. Do not push off back foot.', why: 'Trail-specific. Mimics steep climbs.', detail: 'The key cue: do not push off the back foot. All the work should come from the leg on the step. Drive through the heel, not the toes. Step down with control - do not collapse down.' },
+  'single-leg-rdl': { name: 'Single-leg RDL', cat: 'legs', cues: 'Stand on one leg. Hinge at hip, extend back leg behind, lowering weight toward floor. Hips square.', why: 'Hamstring, balance and glute med.', detail: 'Move slowly - balance is half the work. Hinge at the hip while extending the back leg behind you. Hips stay square to the floor (do not let the back hip open up). Touch the weight low or to the floor, then return. Both legs contribute.' },
+  'single-leg-calf-raise': { name: 'Single-leg calf raise', cat: 'legs', cues: 'On one foot, rise high onto ball of foot. Pause. Lower over 3 seconds. Hold something for balance.', why: 'Achilles resilience.', detail: 'Hold onto a wall or doorframe for balance only - do not pull yourself up. Rise as high as you can onto the ball of your foot, pause for 1 second, then lower over a slow 3 seconds. The slow lower is where the magic happens.' },
+  'calf-raise': { name: 'Calf raise', cat: 'legs', cues: 'Feet hip-width. Rise high onto balls of feet. Pause. Lower slowly (3 seconds down).', why: 'Calf strength = injury prevention.', detail: 'Both feet, hip-width apart. Rise as high as you can, pause at the top, lower over a 3-second count. Calves are tough tissue and respond well to higher reps - aim for sets of 15-20 with control.' },
+  'cossack-squat': { name: 'Cossack squat', cat: 'legs', cues: 'Wide stance. Squat to one side, keeping the other leg straight with toes up. Shift across or stand and switch.', why: 'Hip mobility and adductor strength.', detail: 'Very wide stance - wider than lateral lunge. Squat to one side as deep as you can, keeping the other leg perfectly straight with the heel flat and toes pointing up. Phenomenal for hip mobility. Start with bodyweight, go slowly.' },
+  'db-row': { name: 'Single-arm DB row', cat: 'back', cues: 'Hinge at hips, back flat, one hand on chair for support. Pull weight to hip, leading with elbow. Squeeze blade.', why: 'Counters rounded shoulders.', detail: 'One hand on a sturdy chair or bench, the other holding the dumbbell. Back flat and parallel to the floor. Pull the weight up by driving your elbow back toward your hip - lead with the elbow, not the hand. Squeeze the shoulder blade at the top.' },
+  'bent-over-row': { name: 'Bent-over row', cat: 'back', cues: 'Two dumbbells or barbell. Hinge to ~45 deg, back flat. Pull to lower ribs, squeeze blades. Lower slowly.', why: 'Big back builder - better arm drive.', detail: 'Hinge at the hips so your torso is around 45 degrees from upright. Back perfectly flat. Pull both weights toward your lower ribs (not chest), squeezing your shoulder blades together. Lower with control.' },
+  'rdl-row': { name: 'RDL plus row combo', cat: 'back', cues: 'Hinge into RDL position and hold. Row both dumbbells to ribs. Lower. Stay hinged for all reps then stand.', why: 'Massive back and hamstring stimulus.', detail: 'Hinge into the bottom of an RDL position. Hold this hinge. Row both dumbbells to your ribs and lower with control. Complete all reps in this hinged position before standing back up. Brutal hamstring and back combo.' },
+  'reverse-fly': { name: 'Reverse fly', cat: 'back', cues: 'Hinge forward, back flat, light weights hanging. Raise arms out to sides like wings, squeeze blades.', why: 'Open posture for breathing.', detail: 'Light weights only - this is a small muscle group. Hinge forward with weights hanging straight down. Raise arms out to the sides like wings spreading, squeezing your shoulder blades together. Slight bend in the elbows throughout.' },
+  'pull-apart': { name: 'Rear delt fly', cat: 'back', cues: 'Hinged forward, light dumbbells. Raise arms out wide, squeeze blades. Light weight, full control.', why: 'Posture insurance.', detail: 'Same as reverse fly but with even lighter weight and even slower tempo. The goal is mind-muscle connection with the rear delts and mid-back. Posture insurance against all the rounding running creates.' },
+  'superman': { name: 'Superman', cat: 'back', cues: 'Lie face down, arms extended overhead. Lift arms, chest, and legs off floor. Hold 2s. Lower.', why: 'Lower back endurance.', detail: 'Face down on the floor, arms overhead. Lift your arms, chest, and legs all off the floor at the same time, like you are flying. Hold for 2 seconds at the top. Lower with control. Engage your glutes to take pressure off the lower back.' },
+  'superman-pull': { name: 'Superman pull-down', cat: 'back', cues: 'Lie face down, arms overhead. Lift chest and arms, then sweep arms down to your sides like a lat pull-down.', why: 'Mid-back without a pull-up bar.', detail: 'Start as a superman with chest lifted. Now sweep your arms down to your sides as if doing a pull-up, then back overhead. Slow and controlled. Your mid-back will burn - this is one of the best lat exercises you can do without equipment.' },
+  'good-morning-back': { name: 'Good morning (back)', cat: 'back', cues: 'Light bar or dumbbells at shoulders. Soft knees, hinge slowly. Feel it in lower back and hamstrings.', why: 'Lower back endurance for mile 22.', detail: 'Same movement as the leg-day version but with focus on feeling the work in your lower back. Light weight, slow tempo, full range. The lower back endurance you build here is what holds your form together at mile 22.' },
+  'farmers-carry': { name: 'Farmers carry', cat: 'back', cues: 'Heavy dumbbell each hand, arms straight. Stand tall, shoulders back, ribs down. Walk with control.', why: 'Posterior chain, grip and posture.', detail: 'Pick up two heavy dumbbells - heavier than feels comfortable. Stand tall with shoulders back and ribs down. Walk in a straight line with controlled steps - do not let the weights swing or your shoulders shrug up.' },
+  'suitcase-carry': { name: 'Suitcase carry', cat: 'back', cues: 'Heavy weight in ONE hand, arm at side. Walk tall - resist tipping toward weighted side. Switch sides.', why: 'Anti-lateral-flexion core demand.', detail: 'Heavy weight in ONE hand. The weight wants to pull you sideways - your obliques and core have to fight to keep you upright. Walk in a straight line, shoulders level. Switch hands halfway through. Looks easy, is brutal.' },
+  'overhead-press': { name: 'Overhead press', cat: 'back', cues: 'Weights at shoulders, palms forward. Brace core. Press overhead until biceps near ears. No back arch.', why: 'Upper back and shoulders for arm drive.', detail: 'Start with weights at shoulder height, palms facing forward. Brace your core HARD. Press straight up until your biceps are near your ears - move your head slightly forward at the top so the weights are over your spine. Do not arch your lower back.' },
+  'thruster': { name: 'Thruster', cat: 'back', cues: 'Two dumbbells at shoulders. Squat down, then explode up and press weights overhead in one motion.', why: 'Full body under fatigue.', detail: 'Hold dumbbells at shoulders. Drop into a full squat. As you drive up out of the squat, use that momentum to press the weights overhead in one fluid motion. Squat-press, squat-press. Lighter weight than you think.' },
+  'push-up': { name: 'Push-up', cat: 'back', cues: 'Hands slightly wider than shoulders, body straight. Lower chest to just above floor, elbows ~45 deg. Drop to knees if needed.', why: 'Pushes against running rounding.', detail: 'Hands slightly wider than shoulders. Body in a straight line from heels to head - no sag, no pike. Elbows at about 45 degrees from your body, not flared straight out. Lower until chest is just above the floor. Drop to knees if form breaks.' },
+  'plank': { name: 'Plank', cat: 'core', cues: 'Forearms on floor, elbows under shoulders. Body straight from heels to head. Squeeze glutes. No sag.', why: 'Anti-extension core for late-race form.', detail: 'Forearms on floor, elbows directly under shoulders. Body in a perfect straight line from heels to head. Squeeze glutes and brace abs. The cue that fixes everything: pretend you are about to be punched in the stomach.' },
+  'side-plank': { name: 'Side plank', cat: 'core', cues: 'On one forearm, body straight, feet stacked. Lift hips so body is a line. Switch sides.', why: 'Glute medius and obliques.', detail: 'On one forearm, elbow under shoulder. Stack your feet (or stagger them for easier). Lift your hips so your body forms a straight diagonal line. If stacked feet are tough for balance, place the top foot in front of the bottom foot.' },
+  'side-plank-reach': { name: 'Side plank reach', cat: 'core', cues: 'In side plank, thread top arm under your body, then sweep it back up to the ceiling. Slow.', why: 'Anti-rotation and thoracic mobility.', detail: 'Hold a side plank. Top arm starts pointing at the ceiling. Slowly thread it down and under your body, rotating your torso. Then sweep it back up to the ceiling. Move slowly - this is mobility plus stability work, not speed.' },
+  'dead-bug': { name: 'Dead bug', cat: 'core', cues: 'On back, arms up, knees at 90 deg over hips. Lower opposite arm and leg slowly without arching low back.', why: 'Deep core stability - better than crunches.', detail: 'Lie on your back, arms straight up, knees bent at 90 degrees over hips. Press your low back into the floor. Slowly lower the opposite arm and leg toward the floor without letting your low back lift. Return and switch sides.' },
+  'bird-dog': { name: 'Bird dog', cat: 'core', cues: 'On hands and knees. Extend opposite arm and leg until parallel to floor. Hold 2s. Hips square.', why: 'Rotational stability for mile 22.', detail: 'Hands under shoulders, knees under hips. Extend opposite arm and leg until both are parallel to the floor. Critical: keep your hips perfectly square - do not let one side rotate up. Hold for 2 seconds. Move slowly between reps.' },
+  'bird-dog-row': { name: 'Bird dog row', cat: 'core', cues: 'On hands and knees, one hand holding a light dumbbell. Extend opposite leg back, then row weight to ribs.', why: 'Anti-rotation with back work bonus.', detail: 'Three points of contact: one hand and two knees. Hold a light dumbbell in the free hand. Extend the opposite leg behind you. Now row the dumbbell to your ribs without letting your torso rotate. Brutal anti-rotation work.' },
+  'pallof-press': { name: 'Pallof press', cat: 'core', cues: 'Hold dumbbell at chest with both hands, sideways to it. Press out, resist sideways pull. Hold 2s. Return.', why: 'Anti-rotation for running economy.', detail: 'Hold one dumbbell at your chest with both hands, standing sideways to where the weight wants to pull (a band anchored to a doorway works even better). Press the weight straight out from your chest - resist the sideways pull. Hold 2 seconds. Return.' },
+  'pallof-press-walk': { name: 'Pallof walk-out', cat: 'core', cues: 'Hold weight at chest with arms extended. Take small steps sideways, then back. Brace HARD.', why: 'Walking anti-rotation translates to form.', detail: 'Press the weight straight out from your chest and hold it there. Now take small sideways steps - first away from your imagined anchor, then back. Brace your core like you mean it. Walking anti-rotation translates directly to running form.' },
+  'hollow-hold': { name: 'Hollow hold', cat: 'core', cues: 'On back, arms overhead, legs straight. Press low back into floor, lift shoulders and legs slightly.', why: 'Total deep core engagement.', detail: 'Lie on your back. Arms straight overhead, legs straight out. Press your lower back firmly into the floor. Now lift your shoulders and legs just slightly off the floor, holding the banana-shape position. Lower the legs to make it harder, bend knees to make it easier.' },
+  'leg-raise': { name: 'Leg raise', cat: 'core', cues: 'On back, hands under bum for support. Lift straight legs to 90 deg, then lower slowly without arching.', why: 'Lower abs that postural work misses.', detail: 'Lie on your back, hands under your bum to protect your lower back. Keep legs straight (or bent for easier). Lift them to 90 degrees, then lower slowly without letting your lower back arch off the floor. The slow lower is the key.' },
+  'russian-twist': { name: 'Russian twist', cat: 'core', cues: 'Sit, lean back, feet off floor. Hold one weight, rotate from torso side to side, tap weight near hips.', why: 'Rotational core strength.', detail: 'Sit on the floor, lean back to a 45-degree angle. Lift feet (or keep them down for easier). Hold one weight in both hands. Rotate from your torso (not your arms) side to side, tapping the weight near your hip each side.' },
+  'mountain-climber': { name: 'Slow mountain climber', cat: 'core', cues: 'In plank position, slowly draw one knee toward chest, then return. Slow and controlled - not cardio.', why: 'Anti-rotation under load.', detail: 'Get into a high plank position. Slowly - SLOWLY - draw one knee toward your chest while keeping your hips perfectly level. This is not cardio. Each rep should take 3-4 seconds. Anti-rotation work in disguise.' },
+  'copenhagen-plank': { name: 'Copenhagen plank', cat: 'core', cues: 'Side plank with inside of top knee on couch. Lower leg lifted (harder) or on floor (easier).', why: 'Adductors - hidden runner injury source.', detail: 'Side plank position. The inside of your top knee rests on a sturdy couch or chair. Easier version: bottom leg rests on floor. Harder version: bottom leg lifted to meet the top one. Builds adductor strength runners desperately need.' },
+  'turkish-get-up': { name: 'Half Turkish get-up', cat: 'core', cues: 'Lie on back holding one weight straight up. Roll to elbow, then to seated, keeping weight overhead.', why: 'Whole body core integration.', detail: 'Lie on your back, one weight pressed straight up overhead. Bend the same-side knee, foot flat. Roll up onto your opposite elbow, then up onto that hand, keeping the weight locked out overhead the whole time. Reverse to lower. Move slowly.' },
+  'clamshell': { name: 'Clamshell', cat: 'core', cues: 'On side, knees bent at 45 deg, feet stacked. Keeping feet together, lift top knee from the hip. Do not roll back.', why: 'Glute medius - prevents IT band issues.', detail: 'Lie on your side, knees bent at 45 degrees, feet stacked. Keep your feet pressed together as you lift the top knee toward the ceiling. Critical: do not let your top hip roll backward to make it easier - this defeats the purpose.' },
+  'box-jump': { name: 'Box step-up jump', cat: 'legs', cues: 'In front of step. Place one foot, drive up explosively, switch legs in air, land softly with other foot.', why: 'Power for hills.', detail: 'Stand in front of a sturdy step. Place one foot fully on the step. Drive up explosively, switching legs in the air, landing softly on the OTHER foot now on the step. Step down with control. Skip the jump and just do explosive step-ups if knees protest.' },
+  'pogo-hop': { name: 'Pogo hops', cat: 'legs', cues: 'Hop on the spot with stiff ankles, minimal knee bend. Quick, springy, ground contact under 0.2s.', why: 'Tendon stiffness = free speed.', detail: 'Stand tall and hop on the spot like a pogo stick. Stiff ankles, minimal knee bend. The goal is super short ground contact - bounce off the floor as quickly as you can. Builds Achilles and calf stiffness which equals free running economy.' },
+  'single-leg-hop': { name: 'Single-leg hop', cat: 'legs', cues: 'Hop forward on one leg, stick the landing 2s with soft knee. Step back, repeat.', why: 'Spring for technical descents.', detail: 'Hop forward on one leg only. The key is sticking the landing - hold for a full 2 seconds with a soft, controlled knee. If you wobble or step out, you went too far. Step back to start, repeat. This builds the spring you need on technical trail descents.' },
+  'broad-jump': { name: 'Broad jump', cat: 'legs', cues: 'Stand tall, arms back, jump forward as far as you can with both feet, landing soft. Walk back, repeat.', why: 'Horizontal power for stride.', detail: 'Stand tall. Swing your arms back, then forward, jumping forward as far as you can with both feet. Land soft and stable - if you fall forward, you went too far. Walk back, reset, repeat. Pure horizontal power that translates straight to your stride.' },
+  'mobility-flow': { name: 'Mobility flow', cat: 'core', cues: 'Worlds greatest stretch x5 each side, deep squat hold 30s, hip flexor stretch 30s each side, thoracic rotations x10.', why: 'Active recovery without fatigue.', detail: 'A flow rather than a workout. Worlds greatest stretch (lunge with rotation) 5 each side. Deep squat hold for 30 seconds. Hip flexor stretch 30 seconds each side. Thoracic rotations on hands and knees 10 each side. Ankle rocks 10 each side.' }
+};
+
+function S(day, type, items) { return { day, type, items }; }
+
+const planData = [
+  { week: 1, date: '25 May', phase: 1, focus: 'Foundation week 1 - meet the movements', sessions: [
+    S('Mon', 'Legs (squat)', [['bodyweight-squat', '2 x 10'], ['reverse-lunge', '2 x 8 ea leg'], ['wall-sit', '2 x 30s'], ['calf-raise', '2 x 15']]),
+    S('Tue', 'Back', [['superman', '2 x 10'], ['glute-bridge', '2 x 12'], ['bird-dog', '2 x 8 ea side'], ['push-up', '2 x 6 (knees ok)']]),
+    S('Wed', 'Core', [['plank', '2 x 20s'], ['dead-bug', '2 x 8 ea side'], ['side-plank', '2 x 15s ea side'], ['hollow-hold', '2 x 15s']]),
+    S('Thu', 'Legs (hinge)', [['glute-bridge', '2 x 12'], ['single-leg-glute-bridge', '2 x 6 ea leg'], ['lateral-lunge', '2 x 6 ea side'], ['clamshell', '2 x 12 ea side']])
+  ]},
+  { week: 2, date: '01 Jun', phase: 1, focus: 'Foundation week 2 - build the habit', sessions: [
+    S('Mon', 'Legs (squat)', [['bodyweight-squat', '3 x 10'], ['curtsy-lunge', '2 x 8 ea side'], ['wall-sit', '2 x 40s'], ['single-leg-calf-raise', '2 x 8 ea leg']]),
+    S('Tue', 'Back', [['superman-pull', '2 x 10'], ['glute-bridge', '3 x 12'], ['push-up', '2 x 8'], ['reverse-fly', '2 x 10 (light)']]),
+    S('Wed', 'Core', [['plank', '3 x 25s'], ['dead-bug', '3 x 8 ea side'], ['mountain-climber', '2 x 10 ea side'], ['bird-dog', '3 x 8 ea side']]),
+    S('Thu', 'Legs (hinge)', [['glute-bridge', '3 x 15'], ['single-leg-glute-bridge', '2 x 8 ea leg'], ['cossack-squat', '2 x 6 ea side'], ['side-plank', '2 x 20s ea side']])
+  ]},
+  { week: 3, date: '08 Jun', phase: 1, focus: 'Foundation week 3 - feeling stronger', sessions: [
+    S('Mon', 'Legs (squat)', [['bodyweight-squat', '3 x 12'], ['split-squat', '2 x 8 ea leg'], ['wall-sit', '3 x 40s'], ['calf-raise', '3 x 20']]),
+    S('Tue', 'Back', [['superman', '3 x 10'], ['push-up', '3 x 8'], ['bird-dog', '3 x 10 ea side'], ['superman-pull', '2 x 10']]),
+    S('Wed', 'Core', [['plank', '3 x 30s'], ['hollow-hold', '3 x 20s'], ['side-plank', '3 x 20s ea side'], ['leg-raise', '2 x 8']]),
+    S('Thu', 'Legs (hinge)', [['single-leg-glute-bridge', '3 x 8 ea leg'], ['lateral-lunge', '3 x 6 ea side'], ['curtsy-lunge', '2 x 8 ea side'], ['clamshell', '3 x 15 ea side']])
+  ]},
+  { week: 4, date: '15 Jun', phase: 1, focus: 'Foundation week 4 - last bodyweight week', sessions: [
+    S('Mon', 'Legs (squat)', [['bodyweight-squat', '3 x 15'], ['reverse-lunge', '3 x 10 ea leg'], ['wall-sit', '3 x 45s'], ['single-leg-calf-raise', '3 x 8 ea leg']]),
+    S('Tue', 'Back', [['push-up', '3 x 10'], ['superman-pull', '3 x 10'], ['bird-dog-row', '2 x 8 ea side (light)'], ['glute-bridge', '3 x 15']]),
+    S('Wed', 'Core', [['plank', '3 x 40s'], ['dead-bug', '3 x 10 ea side'], ['russian-twist', '2 x 10 ea side'], ['hollow-hold', '3 x 25s']]),
+    S('Thu', 'Legs (hinge)', [['single-leg-glute-bridge', '3 x 10 ea leg'], ['cossack-squat', '3 x 6 ea side'], ['lateral-lunge', '3 x 8 ea side'], ['side-plank', '3 x 25s ea side']])
+  ]},
+  { week: 5, date: '22 Jun', phase: 2, focus: 'Build week 1 - load goes on (start light!)', sessions: [
+    S('Mon', 'Legs (squat)', [['goblet-squat', '3 x 10'], ['split-squat', '3 x 8 ea leg'], ['calf-raise', '3 x 15'], ['plank', '2 x 30s']]),
+    S('Tue', 'Back', [['db-row', '3 x 10 ea side'], ['overhead-press', '3 x 10'], ['superman', '3 x 10'], ['push-up', '3 x 8']]),
+    S('Wed', 'Core', [['pallof-press', '3 x 10 ea side'], ['dead-bug', '3 x 10 ea side'], ['side-plank', '3 x 25s ea side'], ['hollow-hold', '3 x 25s']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '3 x 10'], ['hip-thrust', '3 x 12'], ['curtsy-lunge', '3 x 8 ea side'], ['clamshell', '3 x 15 ea side']])
+  ]},
+  { week: 6, date: '29 Jun', phase: 2, focus: 'Build week 2 - find your weights', sessions: [
+    S('Mon', 'Legs (squat)', [['goblet-squat', '3 x 12'], ['walking-lunge', '3 x 8 ea leg'], ['single-leg-calf-raise', '3 x 8 ea leg'], ['plank', '3 x 30s']]),
+    S('Tue', 'Back', [['bent-over-row', '3 x 10'], ['overhead-press', '3 x 10'], ['reverse-fly', '3 x 10'], ['superman', '3 x 12']]),
+    S('Wed', 'Core', [['pallof-press', '3 x 12 ea side'], ['bird-dog-row', '3 x 8 ea side'], ['side-plank-reach', '2 x 8 ea side'], ['leg-raise', '3 x 10']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '3 x 10'], ['single-leg-glute-bridge', '3 x 10 ea leg'], ['kb-swing', '3 x 12'], ['copenhagen-plank', '2 x 15s ea side']])
+  ]},
+  { week: 7, date: '06 Jul', phase: 2, focus: 'Build week 3 - runner-specific focus', sessions: [
+    S('Mon', 'Legs (squat)', [['goblet-squat', '3 x 12'], ['step-up', '3 x 8 ea leg'], ['lateral-lunge', '3 x 8 ea side'], ['calf-raise', '3 x 20']]),
+    S('Tue', 'Back', [['db-row', '3 x 12 ea side'], ['rdl-row', '3 x 8'], ['overhead-press', '3 x 10'], ['push-up', '3 x 10']]),
+    S('Wed', 'Core', [['pallof-press-walk', '3 x 8 ea side'], ['hollow-hold', '3 x 30s'], ['mountain-climber', '3 x 10 ea side (slow)'], ['side-plank', '3 x 30s ea side']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '3 x 12'], ['hip-thrust', '3 x 12'], ['kb-swing', '3 x 15'], ['single-leg-rdl', '2 x 6 ea leg (BW)']])
+  ]},
+  { week: 8, date: '13 Jul', phase: 2, focus: 'Build week 4 - DELOAD (lighter, recover)', sessions: [
+    S('Mon', 'Legs (light)', [['goblet-squat', '2 x 10 lighter'], ['reverse-lunge', '2 x 8 ea leg'], ['calf-raise', '2 x 15'], ['plank', '2 x 30s']]),
+    S('Tue', 'Back (light)', [['db-row', '2 x 10 ea side'], ['overhead-press', '2 x 8'], ['superman', '2 x 10'], ['reverse-fly', '2 x 10']]),
+    S('Wed', 'Core', [['pallof-press', '2 x 10 ea side'], ['dead-bug', '2 x 10 ea side'], ['bird-dog', '2 x 10 ea side'], ['side-plank', '2 x 25s ea side']]),
+    S('Thu', 'Mobility plus activation', [['mobility-flow', 'full flow'], ['glute-bridge', '2 x 15'], ['clamshell', '2 x 15 ea side'], ['superman-pull', '2 x 10']])
+  ]},
+  { week: 9, date: '20 Jul', phase: 2, focus: 'Build week 5 - push the weights up', sessions: [
+    S('Mon', 'Legs (squat)', [['goblet-squat', '4 x 10'], ['bulgarian-split-squat', '3 x 6 ea leg'], ['cossack-squat', '2 x 6 ea side'], ['plank', '3 x 40s']]),
+    S('Tue', 'Back', [['bent-over-row', '4 x 10'], ['overhead-press', '4 x 8'], ['rdl-row', '3 x 8'], ['push-up', '3 x 10']]),
+    S('Wed', 'Core', [['pallof-press', '4 x 10 ea side'], ['hollow-hold', '3 x 30s'], ['russian-twist', '3 x 10 ea side (DB)'], ['side-plank-reach', '3 x 8 ea side']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '4 x 10'], ['hip-thrust', '4 x 12'], ['kb-swing', '3 x 15'], ['single-leg-rdl', '3 x 6 ea leg']])
+  ]},
+  { week: 10, date: '27 Jul', phase: 2, focus: 'Build week 6 - strong end to build phase', sessions: [
+    S('Mon', 'Legs (squat)', [['front-squat', '4 x 8'], ['walking-lunge', '3 x 10 ea leg'], ['step-up', '3 x 8 ea leg'], ['plank', '3 x 45s']]),
+    S('Tue', 'Back', [['db-row', '4 x 10 ea side'], ['overhead-press', '4 x 8'], ['farmers-carry', '3 x 40s heavy'], ['superman', '3 x 12']]),
+    S('Wed', 'Core', [['pallof-press-walk', '3 x 10 ea side'], ['turkish-get-up', '2 x 4 ea side'], ['leg-raise', '3 x 10'], ['side-plank', '3 x 35s ea side']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '4 x 10'], ['hip-thrust', '4 x 12'], ['kb-swing', '4 x 15'], ['single-leg-rdl', '3 x 8 ea leg']])
+  ]},
+  { week: 11, date: '03 Aug', phase: 3, focus: 'Strength week 1 - go heavier, fewer reps', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '4 x 6'], ['bulgarian-split-squat', '3 x 8 ea leg'], ['single-leg-calf-raise', '3 x 10 ea leg'], ['plank', '3 x 45s']]),
+    S('Tue', 'Back', [['bent-over-row', '4 x 6'], ['overhead-press', '4 x 6'], ['suitcase-carry', '3 x 30s ea side'], ['push-up', '3 x 10']]),
+    S('Wed', 'Core', [['pallof-press', '4 x 10 ea side'], ['hollow-hold', '3 x 40s'], ['copenhagen-plank', '2 x 15s ea side'], ['bird-dog-row', '3 x 8 ea side']]),
+    S('Thu', 'Legs (hinge)', [['deadlift', '4 x 6'], ['hip-thrust', '4 x 8'], ['kb-swing', '4 x 15'], ['single-leg-rdl', '3 x 8 ea leg']])
+  ]},
+  { week: 12, date: '10 Aug', phase: 3, focus: 'Strength week 2 - keep building', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '4 x 6'], ['bulgarian-split-squat', '3 x 8 ea leg'], ['box-jump', '3 x 6'], ['plank', '3 x 45s']]),
+    S('Tue', 'Back', [['db-row', '4 x 8 ea side'], ['thruster', '3 x 8'], ['reverse-fly', '3 x 12'], ['push-up', '3 x 12']]),
+    S('Wed', 'Core', [['pallof-press-walk', '3 x 10 ea side'], ['turkish-get-up', '3 x 4 ea side'], ['russian-twist', '3 x 12 ea side'], ['side-plank-reach', '3 x 10 ea side']]),
+    S('Thu', 'Legs (hinge)', [['sumo-deadlift', '4 x 6'], ['hip-thrust', '4 x 10'], ['good-morning', '3 x 10'], ['single-leg-rdl', '3 x 8 ea leg']])
+  ]},
+  { week: 13, date: '17 Aug', phase: 3, focus: 'Strength week 3 - peak load week', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '5 x 5'], ['front-squat', '3 x 6'], ['box-jump', '4 x 6'], ['plank', '3 x 60s']]),
+    S('Tue', 'Back', [['bent-over-row', '5 x 5'], ['overhead-press', '4 x 6'], ['farmers-carry', '3 x 45s heavy'], ['suitcase-carry', '3 x 30s ea side']]),
+    S('Wed', 'Core', [['pallof-press', '4 x 12 ea side'], ['hollow-hold', '3 x 45s'], ['copenhagen-plank', '3 x 20s ea side'], ['leg-raise', '3 x 12']]),
+    S('Thu', 'Legs (hinge)', [['deadlift', '5 x 5'], ['hip-thrust', '4 x 8'], ['kb-swing', '4 x 20'], ['single-leg-rdl', '3 x 8 ea leg']])
+  ]},
+  { week: 14, date: '24 Aug', phase: 3, focus: 'Strength week 4 - DELOAD', sessions: [
+    S('Mon', 'Legs (light)', [['goblet-squat', '3 x 8 lighter'], ['split-squat', '2 x 8 ea leg'], ['calf-raise', '2 x 15'], ['plank', '2 x 40s']]),
+    S('Tue', 'Back (light)', [['db-row', '3 x 8 ea side'], ['overhead-press', '3 x 8'], ['superman-pull', '2 x 10'], ['reverse-fly', '2 x 10']]),
+    S('Wed', 'Core', [['pallof-press', '3 x 10 ea side'], ['dead-bug', '2 x 10 ea side'], ['side-plank', '2 x 30s ea side'], ['hollow-hold', '2 x 30s']]),
+    S('Thu', 'Mobility plus activation', [['mobility-flow', 'full flow'], ['single-leg-glute-bridge', '2 x 8 ea leg'], ['clamshell', '2 x 15 ea side'], ['bird-dog', '2 x 10 ea side']])
+  ]},
+  { week: 15, date: '31 Aug', phase: 3, focus: 'Strength week 5 - race-specific power', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '4 x 6'], ['bulgarian-split-squat', '4 x 8 ea leg'], ['box-jump', '4 x 6'], ['plank', '3 x 60s']]),
+    S('Tue', 'Back', [['bent-over-row', '4 x 6'], ['thruster', '3 x 8'], ['farmers-carry', '3 x 45s'], ['push-up', '3 x 12']]),
+    S('Wed', 'Core', [['pallof-press-walk', '3 x 12 ea side'], ['turkish-get-up', '3 x 4 ea side'], ['copenhagen-plank', '3 x 20s ea side'], ['side-plank-reach', '3 x 10 ea side']]),
+    S('Thu', 'Legs (hinge)', [['deadlift', '4 x 5'], ['hip-thrust', '4 x 10'], ['single-leg-rdl', '3 x 8 ea leg'], ['broad-jump', '3 x 5']])
+  ]},
+  { week: 16, date: '07 Sep', phase: 3, focus: 'Strength week 6 - last heavy week', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '4 x 5 heavy'], ['bulgarian-split-squat', '4 x 8 ea leg'], ['broad-jump', '3 x 5'], ['plank', '3 x 60s']]),
+    S('Tue', 'Back', [['bent-over-row', '4 x 5 heavy'], ['overhead-press', '4 x 6'], ['suitcase-carry', '3 x 40s ea side'], ['superman-pull', '3 x 12']]),
+    S('Wed', 'Core', [['pallof-press', '4 x 12 ea side'], ['hollow-hold', '3 x 45s'], ['copenhagen-plank', '3 x 25s ea side'], ['leg-raise', '3 x 12']]),
+    S('Thu', 'Legs (hinge)', [['deadlift', '4 x 5 heavy'], ['hip-thrust', '4 x 8 heavy'], ['kb-swing', '4 x 20'], ['single-leg-rdl', '3 x 8 ea leg']])
+  ]},
+  { week: 17, date: '14 Sep', phase: 4, focus: 'Sharpen week 1 - drop volume, keep intensity', sessions: [
+    S('Mon', 'Legs (squat)', [['back-squat', '3 x 5'], ['split-squat', '3 x 6 ea leg'], ['pogo-hop', '3 x 30s'], ['plank', '3 x 45s']]),
+    S('Tue', 'Back', [['bent-over-row', '3 x 5'], ['overhead-press', '3 x 5'], ['suitcase-carry', '2 x 30s ea side'], ['push-up', '2 x 10']]),
+    S('Wed', 'Core', [['pallof-press', '3 x 10 ea side'], ['hollow-hold', '3 x 30s'], ['side-plank', '3 x 30s ea side'], ['dead-bug', '3 x 10 ea side']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '3 x 5'], ['hip-thrust', '3 x 8'], ['single-leg-rdl', '3 x 6 ea leg'], ['clamshell', '2 x 15 ea side']])
+  ]},
+  { week: 18, date: '21 Sep', phase: 4, focus: 'Sharpen week 2 - taper begins', sessions: [
+    S('Mon', 'Legs (squat)', [['goblet-squat', '3 x 6'], ['split-squat', '3 x 6 ea leg'], ['pogo-hop', '3 x 20s'], ['plank', '3 x 40s']]),
+    S('Tue', 'Back', [['db-row', '3 x 6 ea side'], ['overhead-press', '3 x 5'], ['superman-pull', '2 x 10'], ['push-up', '2 x 8']]),
+    S('Wed', 'Core', [['pallof-press', '3 x 10 ea side'], ['dead-bug', '2 x 10 ea side'], ['side-plank', '2 x 30s ea side'], ['bird-dog', '3 x 10 ea side']]),
+    S('Thu', 'Legs (hinge)', [['rdl', '3 x 5'], ['single-leg-glute-bridge', '3 x 8 ea leg'], ['clamshell', '3 x 15 ea side'], ['mobility-flow', 'short flow']])
+  ]},
+  { week: 19, date: '28 Sep', phase: 4, focus: 'Race week prep - short and sharp', sessions: [
+    S('Mon', 'Legs (light)', [['goblet-squat', '2 x 6 light'], ['split-squat', '2 x 6 ea leg'], ['calf-raise', '2 x 12'], ['plank', '2 x 30s']]),
+    S('Tue', 'Back (light)', [['db-row', '2 x 6 ea side'], ['overhead-press', '2 x 5 light'], ['superman', '2 x 10'], ['push-up', '2 x 6']]),
+    S('Wed', 'Activation', [['glute-bridge', '2 x 12'], ['clamshell', '2 x 12 ea side'], ['bird-dog', '2 x 8 ea side'], ['dead-bug', '2 x 8 ea side']]),
+    S('Thu', 'Mobility', [['mobility-flow', 'full flow'], ['single-leg-glute-bridge', '2 x 8 ea leg'], ['plank', '2 x 30s'], ['side-plank', '2 x 20s ea side']])
+  ]},
+  { week: 20, date: '05 Oct', phase: 4, focus: 'RACE WEEK - minimal, just keep things firing', sessions: [
+    S('Mon', 'Activation only', [['glute-bridge', '2 x 10'], ['clamshell', '2 x 10 ea side'], ['bird-dog', '2 x 8 ea side'], ['mobility-flow', 'short flow']]),
+    S('Tue', 'Mobility only', [['mobility-flow', 'full flow'], ['glute-bridge', '1 x 10'], ['plank', '1 x 20s'], ['clamshell', '1 x 10 ea side']]),
+    S('Wed', 'Pre-race shake-out', [['glute-bridge', '1 x 10'], ['mobility-flow', 'short flow'], ['bird-dog', '1 x 8 ea side'], ['clamshell', '1 x 8 ea side']]),
+    S('Thu', 'Rest / very light', [['mobility-flow', 'gentle'], ['glute-bridge', '1 x 8'], ['clamshell', '1 x 8 ea side'], ['bird-dog', '1 x 6 ea side']])
+  ]}
+];
+
+const phaseColors = {
+  1: { mid: '#534AB7', bg: '#EEEDFE' },
+  2: { mid: '#0F6E56', bg: '#E1F5EE' },
+  3: { mid: '#993556', bg: '#FBEAF0' },
+  4: { mid: '#854F0B', bg: '#FAEEDA' }
+};
+
+const STORAGE_KEY = 'marathon-strength-pwa-v1';
+let state = { completed: {}, expanded: {} };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      state = JSON.parse(raw);
+      if (!state.completed) state.completed = {};
+      if (!state.expanded) state.expanded = {};
+    }
+  } catch (e) { state = { completed: {}, expanded: {} }; }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function totalSessions() { return planData.reduce((s, w) => s + w.sessions.length, 0); }
+
+function completedCount(filterPhase) {
+  let count = 0;
+  planData.forEach(w => {
+    if (filterPhase && w.phase !== filterPhase) return;
+    w.sessions.forEach((s, i) => { if (state.completed[w.week + '-' + i]) count++; });
+  });
+  return count;
+}
+
+function totalForPhase(p) {
+  return planData.filter(w => w.phase === p).reduce((s, w) => s + w.sessions.length, 0);
+}
+
+function streakMessage() {
+  const t = completedCount();
+  if (t === 0) return 'Tap a week to start';
+  if (t < 4) return t + ' session' + (t === 1 ? '' : 's') + ' done - you have started!';
+  if (t < 16) return t + ' sessions in. Habit forming nicely';
+  if (t < 32) return t + ' done. Strength is building';
+  if (t < 48) return t + ' done - over halfway there!';
+  if (t < 64) return t + ' sessions strong. Doing the work';
+  if (t < 80) return t + ' done - race-ready territory';
+  return t + ' sessions complete. Marathon ready!';
+}
+
+function updateProgress() {
+  const total = totalSessions();
+  const done = completedCount();
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('overall-stat').textContent = done + ' / ' + total;
+  document.getElementById('overall-bar').style.width = pct + '%';
+  document.getElementById('streak-line').textContent = streakMessage();
+  for (let p = 1; p <= 4; p++) {
+    const phaseDone = completedCount(p);
+    const phaseTotal = totalForPhase(p);
+    const phasePct = Math.round((phaseDone / phaseTotal) * 100);
+    document.getElementById('phase-' + p + '-pct').textContent = phasePct + '%';
+  }
+}
+
+function checkSVG() {
+  return '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;"><polyline points="3,8.5 6.5,12 13,4" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function tickBadgeSVG(color) {
+  return '<svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;"><circle cx="8" cy="8" r="7" fill="' + color + '"/><polyline points="4.5,8.5 7,11 11.5,5.5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function chevronSVG() {
+  return '<svg width="10" height="14" viewBox="0 0 10 14" xmlns="http://www.w3.org/2000/svg"><polyline points="2,2 8,7 2,12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function renderLibrary() {
+  const groups = [
+    { title: 'Legs - squat patterns', keys: ['bodyweight-squat', 'goblet-squat', 'back-squat', 'front-squat', 'tempo-squat', 'wall-sit', 'goblet-cyclist-squat', 'cossack-squat'] },
+    { title: 'Legs - hinge and glutes', keys: ['glute-bridge', 'single-leg-glute-bridge', 'rdl', 'deadlift', 'sumo-deadlift', 'hip-thrust', 'good-morning', 'kb-swing'] },
+    { title: 'Legs - single leg', keys: ['reverse-lunge', 'walking-lunge', 'lateral-lunge', 'curtsy-lunge', 'split-squat', 'bulgarian-split-squat', 'step-up', 'single-leg-rdl', 'single-leg-calf-raise', 'calf-raise'] },
+    { title: 'Back', keys: ['db-row', 'bent-over-row', 'rdl-row', 'reverse-fly', 'pull-apart', 'superman', 'superman-pull', 'good-morning-back', 'farmers-carry', 'suitcase-carry', 'overhead-press', 'thruster', 'push-up'] },
+    { title: 'Core', keys: ['plank', 'side-plank', 'side-plank-reach', 'dead-bug', 'bird-dog', 'bird-dog-row', 'pallof-press', 'pallof-press-walk', 'hollow-hold', 'leg-raise', 'russian-twist', 'mountain-climber', 'copenhagen-plank', 'turkish-get-up', 'clamshell'] },
+    { title: 'Power and sharpen', keys: ['box-jump', 'pogo-hop', 'single-leg-hop', 'broad-jump', 'mobility-flow'] }
+  ];
+  let html = '';
+  groups.forEach(g => {
+    html += '<div class="library-group"><div class="library-group-title">' + g.title + '</div>';
+    g.keys.forEach(k => {
+      const ex = exercises[k];
+      if (ex) html += '<div class="library-item"><div class="library-item-name">' + ex.name + '</div><div class="library-item-cues">' + ex.cues + '</div><div class="library-item-why">Why: ' + ex.why + '</div></div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('library-content').innerHTML = html;
+}
+
+function renderWeeks() {
+  const container = document.getElementById('weeks-container');
+  let html = '';
+  planData.forEach(w => {
+    const phase = phaseColors[w.phase];
+    const weekKey = 'w' + w.week;
+    const expanded = state.expanded[weekKey];
+    const sessionsDone = w.sessions.filter((s, i) => state.completed[w.week + '-' + i]).length;
+    const allDone = sessionsDone === w.sessions.length;
+    const doneBadge = allDone ? '<span style="margin-left:4px;">' + tickBadgeSVG(phase.mid) + '</span>' : '';
+    html += '<div class="week">' +
+      '<div class="week-header" data-week="' + weekKey + '">' +
+        '<div class="phase-stripe" style="background:' + phase.mid + ';"></div>' +
+        '<div class="week-info">' +
+          '<div class="week-title-row">' +
+            '<span class="week-num">Week ' + w.week + '</span>' +
+            '<span class="week-date">' + w.date + '</span>' +
+            doneBadge +
+          '</div>' +
+          '<div class="week-focus">' + w.focus + '</div>' +
+        '</div>' +
+        '<div class="session-counter">' + sessionsDone + '/' + w.sessions.length + '</div>' +
+        '<div class="chevron' + (expanded ? ' open' : '') + '">' + chevronSVG() + '</div>' +
+      '</div>' +
+      (expanded ? renderSessions(w) : '') +
+    '</div>';
+  });
+  container.innerHTML = html;
+  document.querySelectorAll('.week-header').forEach(el => {
+    el.addEventListener('click', () => {
+      const wk = el.dataset.week;
+      state.expanded[wk] = !state.expanded[wk];
+      saveState();
+      renderWeeks();
+    });
+  });
+  document.querySelectorAll('.checkbox').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const key = el.dataset.key;
+      state.completed[key] = !state.completed[key];
+      saveState();
+      renderWeeks();
+      updateProgress();
+    });
+  });
+  document.querySelectorAll('.exercise-name').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      openExerciseModal(el.dataset.ex);
+    });
+  });
+}
+
+function renderSessions(w) {
+  const phase = phaseColors[w.phase];
+  let html = '<div class="sessions">';
+  w.sessions.forEach((s, i) => {
+    const key = w.week + '-' + i;
+    const done = state.completed[key];
+    html += '<div class="session">' +
+      '<div class="checkbox' + (done ? ' done' : '') + '" data-key="' + key + '" style="' + (done ? 'background:' + phase.mid + ';' : '') + '">' + (done ? checkSVG() : '') + '</div>' +
+      '<div class="session-body' + (done ? ' done' : '') + '">' +
+        '<div class="session-meta">' +
+          '<span class="session-day">' + s.day + '</span>' +
+          '<span class="session-type" style="color:' + phase.mid + ';background:' + phase.bg + ';">' + s.type + '</span>' +
+        '</div>' +
+        '<div class="session-list">';
+    s.items.forEach(([exKey, reps]) => {
+      const ex = exercises[exKey];
+      if (ex) html += '<div class="exercise-row"><span class="exercise-name" data-ex="' + exKey + '">' + ex.name + '</span><span class="exercise-reps">' + reps + '</span></div>';
+    });
+    html += '</div></div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function openExerciseModal(key) {
+  const ex = exercises[key];
+  if (!ex) return;
+  const html = '<h2>' + ex.name + '</h2>' +
+    '<div class="modal-sub">Form check for runners</div>' +
+    '<h3>Quick cues</h3>' +
+    '<p>' + ex.cues + '</p>' +
+    '<h3>Detailed form</h3>' +
+    '<p>' + ex.detail + '</p>' +
+    '<div class="why-box"><strong>Why this exercise:</strong> ' + ex.why + '</div>' +
+    '<button class="modal-close" id="modal-close-btn">Close</button>';
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modal-backdrop').addEventListener('click', e => {
+  if (e.target.id === 'modal-backdrop') closeModal();
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state = { completed: {}, expanded: { 'w1': true } };
+    saveState();
+    renderWeeks();
+    updateProgress();
+  }
+});
+
+document.getElementById('exercises-btn').addEventListener('click', () => {
+  const lib = document.getElementById('exercise-library');
+  const btn = document.getElementById('exercises-btn');
+  if (lib.classList.contains('open')) {
+    lib.classList.remove('open');
+    btn.textContent = 'Exercise library';
+  } else {
+    lib.classList.add('open');
+    btn.textContent = 'Hide library';
+  }
+});
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('install-dismissed')) {
+    document.getElementById('install-banner').classList.add('show');
+  }
+});
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    document.getElementById('install-banner').classList.remove('show');
+  }
+});
+document.getElementById('install-dismiss').addEventListener('click', () => {
+  localStorage.setItem('install-dismissed', '1');
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+loadState();
+if (Object.keys(state.completed).length === 0 && Object.keys(state.expanded).length === 0) {
+  state.expanded['w1'] = true;
+}
+renderWeeks();
+updateProgress();
+renderLibrary();
+</script>
+</body>
+</html>
